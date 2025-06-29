@@ -1,4 +1,4 @@
-# Foolish API
+# Explore API
 
 This is a simple API built with Axum in Rust.
 
