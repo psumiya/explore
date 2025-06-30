@@ -1,7 +1,8 @@
 
 use axum::{
     debug_handler,
-    extract::State,
+    extract::{Path, State},
+    http::StatusCode,
     routing::get,
     Json,
     Router,
@@ -32,6 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = Router::new()
         .route("/", get(handler).post(create_user))
         .route("/users", get(list_users))
+        .route("/users/{id}", get(get_user))
         .with_state(db);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
@@ -69,4 +71,16 @@ async fn list_users(
     let users_data = db.get_all_users().unwrap();
     let users: Vec<User> = users_data.into_iter().map(|(id, name)| User { id, name }).collect();
     Json(users)
+}
+
+#[debug_handler]
+async fn get_user(
+    State(db): State<Db>,
+    Path(id): Path<i64>,
+) -> Result<Json<User>, StatusCode> {
+    match db.get_user_by_id(id) {
+        Ok(Some((id, name))) => Ok(Json(User { id, name })),
+        Ok(None) => Err(StatusCode::NOT_FOUND),
+        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+    }
 }

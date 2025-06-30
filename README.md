@@ -63,3 +63,30 @@ curl http://localhost:3000/users
   }
 ]
 ```
+
+### GET /users/:id
+
+Retrieves details of a single user by their ID.
+
+**Example Request:**
+
+```bash
+curl http://localhost:3000/users/12345
+```
+
+**Example Response (Success):**
+
+```json
+{
+  "id": 12345,
+  "name": "John Doe"
+}
+```
+
+**Example Response (Not Found):**
+
+```
+HTTP/1.1 404 Not Found
+content-length: 0
+date: ...
+```

@@ -40,4 +40,16 @@ impl Db {
         }
         Ok(users)
     }
+
+    pub fn get_user_by_id(&self, id: i64) -> Result<Option<(i64, String)>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare("SELECT id, name FROM users WHERE id = ?1")?;
+        let mut user_iter = stmt.query_map(params![id], |row| Ok((row.get(0)?, row.get(1)?)))?;
+
+        if let Some(user) = user_iter.next() {
+            Ok(Some(user?))
+        } else {
+            Ok(None)
+        }
+    }
 }
