@@ -52,4 +52,18 @@ impl Db {
             Ok(None)
         }
     }
+
+    pub fn update_user(&self, id: i64, name: &str) -> Result<usize> {
+        self.conn.lock().unwrap().execute(
+            "UPDATE users SET name = ?1 WHERE id = ?2",
+            params![name, id],
+        )
+    }
+
+    pub fn delete_user(&self, id: i64) -> Result<usize> {
+        self.conn.lock().unwrap().execute(
+            "DELETE FROM users WHERE id = ?1",
+            params![id],
+        )
+    }
 }

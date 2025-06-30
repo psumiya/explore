@@ -90,3 +90,56 @@ HTTP/1.1 404 Not Found
 content-length: 0
 date: ...
 ```
+
+### PUT /users/:id
+
+Updates an existing user by their ID.
+
+**Example Request:**
+
+```bash
+curl -X PUT http://localhost:3000/users/12345 -H "Content-Type: application/json" -d '{"name": "Jane Doe"}'
+```
+
+**Example Response (Success):**
+
+```json
+{
+  "id": 12345,
+  "name": "Jane Doe"
+}
+```
+
+**Example Response (Not Found):**
+
+```
+HTTP/1.1 404 Not Found
+content-length: 0
+date: ...
+```
+
+### DELETE /users/:id
+
+Deletes a user by their ID.
+
+**Example Request:**
+
+```bash
+curl -X DELETE http://localhost:3000/users/12345
+```
+
+**Example Response (Success):**
+
+```
+HTTP/1.1 204 No Content
+content-length: 0
+date: ...
+```
+
+**Example Response (Not Found):**
+
+```
+HTTP/1.1 404 Not Found
+content-length: 0
+date: ...
+```
