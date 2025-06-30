@@ -38,3 +38,28 @@ curl -X POST http://localhost:3000/ -H "Content-Type: application/json" -d '{"na
   "name": "John Doe"
 }
 ```
+
+### GET /users
+
+Lists all users in the database.
+
+**Example Request:**
+
+```bash
+curl http://localhost:3000/users
+```
+
+**Example Response:**
+
+```json
+[
+  {
+    "id": 12345,
+    "name": "John Doe"
+  },
+  {
+    "id": 67890,
+    "name": "Jane Smith"
+  }
+]
+```

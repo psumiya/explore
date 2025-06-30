@@ -6,15 +6,16 @@ use axum::{
     Json,
     Router,
 };
-
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use tokio::sync::mpsc;
+
+mod database;
+use database::Db;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct User {
-    id: u64,
+    id: i64,
     name: String,
 }
 
@@ -24,24 +25,21 @@ struct CreateUser {
 }
 
 #[tokio::main]
-async fn main() {
-    let (tx, mut rx) = mpsc::channel::<User>(100);
-
-    tokio::spawn(async move {
-        while let Some(user) = rx.recv().await {
-            println!("Received user: {:?}", user);
-        }
-    });
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let db = Db::new()?;
+    db.init_table()?;
 
     let app = Router::new()
         .route("/", get(handler).post(create_user))
-        .with_state(tx);
+        .route("/users", get(list_users))
+        .with_state(db);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    let listener = TcpListener::bind(&addr).await.unwrap();
+    let listener = TcpListener::bind(&addr).await?;
     axum::serve(listener, app.into_make_service())
-        .await
-        .unwrap();
+        .await?;
+
+    Ok(())
 }
 
 #[debug_handler]
@@ -51,15 +49,24 @@ async fn handler() -> &'static str {
 
 #[debug_handler]
 async fn create_user(
-    State(tx): State<mpsc::Sender<User>>,
+    State(db): State<Db>,
     Json(payload): Json<CreateUser>,
 ) -> Json<User> {
     let user = User {
-        id: rand::random::<u64>(),
+        id: rand::random::<i64>(),
         name: payload.name,
     };
 
-    tx.send(user.clone()).await.unwrap();
+    db.insert_user(user.id, &user.name).unwrap();
 
     Json(user)
+}
+
+#[debug_handler]
+async fn list_users(
+    State(db): State<Db>,
+) -> Json<Vec<User>> {
+    let users_data = db.get_all_users().unwrap();
+    let users: Vec<User> = users_data.into_iter().map(|(id, name)| User { id, name }).collect();
+    Json(users)
 }
